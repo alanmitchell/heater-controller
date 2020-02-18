@@ -43,6 +43,7 @@ class U3protected:
     def get_analog(self, channel, long_settle=True):
         """Returns the voltage reading from an Analog channel.
         Parameters:
+        channel:     The analog channel number to read.
         long_settle: If True uses the Long Settle mode of reading which
             allows for a much higher source impedance from the voltage source
             being measured.
@@ -58,6 +59,11 @@ class U3protected:
             self.access_lock = False
         
     def set_digital(self, channel, state):
+        """Sets a digital output channel to a particular state.
+        Parameters:
+        channel:  The digital channel number to set.
+        state:    The desired state of the channel.
+        """
 
         # wait for the lock
         self.acquire_lock()
