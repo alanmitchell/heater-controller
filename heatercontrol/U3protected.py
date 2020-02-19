@@ -18,6 +18,17 @@ class U3protected:
         self.dev = u3.U3()    # open U3
         self.dev.getCalibrationData()   # get the calibration data
 
+        # Configure the U3 for this project.  This sets the power up
+        # defaults as well.
+        # FI0-3 set to Analog Inputs, FI4-7 set to Digital Inputs
+        # (so power up doesn't turn on SSR)
+        # EI0-7 set to Analog Inputs
+        self.dev.configU3(
+            FIOAnalog=0x0F,
+            EIOAnalog=0xFF,
+            FIODirection=0x00,
+        )
+
         # This is the variable that will control access to the U3.
         # If True, device is locked (in use).
         self.access_lock = False
@@ -59,7 +70,8 @@ class U3protected:
             self.access_lock = False
         
     def set_digital(self, channel, state):
-        """Sets a digital output channel to a particular state.
+        """Sets a digital output channel to a particular state.  Sets the
+        direction of the Digital pin to output prior to writing state.
         Parameters:
         channel:  The digital channel number to set.
         state:    The desired state of the channel.
@@ -70,6 +82,20 @@ class U3protected:
 
         try:
             return self.dev.setDOState(channel, state)
+
+        finally:
+            # always release lock
+            self.access_lock = False
+
+    def get_digital(self, channel):
+        """Reads and returns the value from the digital channel 'channel'.
+        Does not change the direction of the Digital pin.
+        """
+        # wait for the lock
+        self.acquire_lock()
+
+        try:
+            return self.dev.getDIOState(channel)
 
         finally:
             # always release lock
