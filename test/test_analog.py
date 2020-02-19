@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+import sys
+import time
+
+sys.path.insert(0, '../')
+from heatercontrol.analog_reader import AnalogReader
+from heatercontrol.U3protected import U3protected
+from heatercontrol.pwm import PWM
+
+dev = U3protected()
+
+ch_list = [
+    (0, False),
+    (1, True),
+    (8, True),
+    (15, False),
+]
+rdr = AnalogReader(dev, ch_list)
+rdr.start()
+
+pwm = PWM(dev,
+          lj_channel=6,
+          period=2.0,
+          init_value=0.5)
+pwm.start()
+
+time.sleep(0.1)
+
+while True:
+    print(rdr.values())
+    time.sleep(1)
