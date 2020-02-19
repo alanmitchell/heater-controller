@@ -30,7 +30,7 @@ class PWM(threading.Thread):
         self.lj_device = lj_device
         self.lj_channel = lj_channel
         self.period = period
-        self.value = init_value
+        self.set_value(init_value)
 
     def run(self):
         """Call to start the thread and PWM process.
@@ -40,13 +40,13 @@ class PWM(threading.Thread):
         """
         while True:
             try:
-                if self.value != 0.0:
+                if self._value != 0.0:
                     self.lj_device.set_digital(self.lj_channel, 1)
-                    if self.value != 1.0:
+                    if self._value != 1.0:
                         # partial On
-                        time.sleep(self.period * self.value)
+                        time.sleep(self.period * self._value)
                         self.lj_device.set_digital(self.lj_channel, 0)
-                        time.sleep(self.period * (1.0 - self.value))
+                        time.sleep(self.period * (1.0 - self._value))
                     else:
                         # full On
                         time.sleep(self.period)
@@ -57,8 +57,14 @@ class PWM(threading.Thread):
 
             except:
                 traceback.print_exc(file=sys.stdout)
+                # turn off PWM in case of error
+                try:
+                    self.lj_device.set_digital(self.lj_channel, 0)
+                except:
+                    pass
+                time.sleep(1.0)
             
     def set_value(self, new_value):
         """Sets a new PWM value, between 0.0 and 1.0.
         """
-        self.value = new_value
+        self._value = min(max(0.0, new_value), 1.0)

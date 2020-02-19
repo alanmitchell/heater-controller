@@ -19,7 +19,8 @@ class U3protected:
         self.dev.getCalibrationData()   # get the calibration data
 
         # Configure the U3 for this project.  This sets the power up
-        # defaults as well.
+        # defaults as well. Found that I had to call configIO() even
+        # though I already called configU3 (which sets power on defaults).
         # FI0-3 set to Analog Inputs, FI4-7 set to Digital Inputs
         # (so power up doesn't turn on SSR)
         # EI0-7 set to Analog Inputs
@@ -27,6 +28,10 @@ class U3protected:
             FIOAnalog=0x0F,
             EIOAnalog=0xFF,
             FIODirection=0x00,
+        )            
+        self.dev.configIO(
+            FIOAnalog=0x0F,
+            EIOAnalog=0xFF,
         )
 
         # This is the variable that will control access to the U3.
@@ -35,6 +40,7 @@ class U3protected:
 
     def __del__(self):
         """Close the U3 when this object is destroyed.
+        This does not seem to run, though.
         """
         self.dev.close()
 

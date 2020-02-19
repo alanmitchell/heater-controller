@@ -17,9 +17,17 @@ from heatercontrol.pwm import PWM
 from heatercontrol.U3protected import U3protected
 
 dev = U3protected()
-pwm = PWM(dev, 6, 2.0)
-
 value = float(sys.argv[1])
-pwm.set_value(value)
-while True:
-    time.sleep(0.1)
+pwm = PWM(dev,
+          lj_channel=6,
+          period=2.0,
+          init_value=value)
+pwm.start()
+
+try:
+    while True:
+        time.sleep(0.2)
+finally:
+    # shut off PWM channel
+    pwm.set_value(0.0)
+    dev.set_digital(6, 0)
