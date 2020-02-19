@@ -7,7 +7,7 @@ import u3
 
 class U3protected:
 
-    def __init__(self, timeout=0.1):
+    def __init__(self, timeout=0.5):
         """Opens U3 and performs initialization tasks.
         Parameters:
         timeout:  Determines how long access will be tried before timing out
