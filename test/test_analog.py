@@ -10,6 +10,7 @@ sys.path.insert(0, '../')
 from heatercontrol.analog_reader import AnalogReader
 from heatercontrol.U3protected import U3protected
 from heatercontrol.pwm import PWM
+from heatercontrol.thermistor import Thermistor
 
 dev = U3protected()
 
@@ -29,8 +30,11 @@ pwm = PWM(dev,
           init_value=0.5)
 pwm.start()
 
+t = Thermistor('BAPI 10K-3', 8, 15, 9760)
 time.sleep(0.1)
 
 while True:
-    print(rdr.values())
+    readings = rdr.values() 
+    print(readings)
+    print(f'{t.temperature(readings):.2f} F')
     time.sleep(1.7)
