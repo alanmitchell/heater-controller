@@ -36,8 +36,8 @@ time.sleep(0.1)
 try:
     while True:
         readings = rdr.values() 
-        print(readings)
-        print(f'{t.temperature(readings):.2f} F')
+        print(readings, end='')
+        print(f' {t.temperature(readings):.2f} F')
         time.sleep(1.7)
 
 finally:
