@@ -33,8 +33,15 @@ pwm.start()
 t = Thermistor('BAPI 10K-3', 8, 15, 9760)
 time.sleep(0.1)
 
-while True:
-    readings = rdr.values() 
-    print(readings)
-    print(f'{t.temperature(readings):.2f} F')
-    time.sleep(1.7)
+try:
+    while True:
+        readings = rdr.values() 
+        print(readings)
+        print(f'{t.temperature(readings):.2f} F')
+        time.sleep(1.7)
+
+finally:
+    # shut off PWM channel
+    print('Closing down...')
+    pwm.set_value(0.0)
+    dev.set_digital(6, 0)
