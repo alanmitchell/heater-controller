@@ -23,7 +23,7 @@ coeff = {
 
 class Thermistor:
 
-    def __init__(self, therm_name, therm_ch, applied_ch, divider_r):
+    def __init__(self, therm_name, therm_ch, applied_ch, divider_r, label=''):
         '''
         'therm_name' identifies the thermistor type and is the key into 
             the coefficient dictionary (coeff)
@@ -32,12 +32,14 @@ class Thermistor:
         'applied_ch': the channel number key into the readings dictionry that
             gives the voltage applied to the thermistor divider network.
         'divider_r' is the resistance in ohms of the fixed divider resistor.
+        'label': is a text label to identify the sensor and does not affect calcs.
         '''
         self.coeff = coeff[therm_name]
         self.therm_name = therm_name
         self.therm_ch = therm_ch
         self.applied_ch = applied_ch
         self.divider_r = divider_r
+        self.label = label
 
     def temperature(self, readings, unit='F'):
         """Returns the thermistor temperature given a dictionary of voltage
