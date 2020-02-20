@@ -1,3 +1,5 @@
+user/*.py
+logs/*.log
 .vscode/
 
 # Byte-compiled / optimized / DLL files
