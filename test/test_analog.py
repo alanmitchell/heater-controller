@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+"""Tests the Analog Reading classes, and also runs the PWM concurrently.
+"""
+
 import sys
 import time
 
@@ -19,6 +22,7 @@ ch_list = [
 rdr = AnalogReader(dev, ch_list)
 rdr.start()
 
+# run the PWM simultaneously to test joint use.
 pwm = PWM(dev,
           lj_channel=6,
           period=2.0,
@@ -29,4 +33,4 @@ time.sleep(0.1)
 
 while True:
     print(rdr.values())
-    time.sleep(1)
+    time.sleep(1.7)
