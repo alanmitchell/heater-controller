@@ -7,6 +7,7 @@ import threading
 import traceback
 import sys
 
+import numpy as np
 import simple_pid
 
 from heatercontrol.U3protected import U3protected
@@ -44,10 +45,13 @@ def summarize_thermistor_group(thermistors, analog_readings):
     result = {'average': 0.0, 'detail': []}
     temps = []     # used to calculate average temperature
     for therm in thermistors:
-        temp = therm.tempertaure(analog_readings)
+        temp = therm.temperature(analog_readings)
         temps.append(temp)
         result['detail'].append( (therm.label, temp) )
-    result['average'] = sum(temps) / len(temps)
+    if len(temps):
+        result['average'] = sum(temps) / len(temps)
+    else:
+        result['average'] = np.nan
     
     return result
 
