@@ -7,6 +7,7 @@ import threading
 from heatercontrol.U3protected import U3protected
 from heatercontrol.pwm import PWM
 from heatercontrol.analog_reader import AnalogReader
+from heatercontrol.thermistor import Thermistor
 
 # Channel that reads the voltage that is applied to the
 # thermistor circuits on the Labjack
@@ -55,15 +56,27 @@ class Controller(threading.Thread):
         self.max_pwm = 1.0
 
         analog_channel_list = []
+        outer_temp_objects = []
+        inner_temp_objects = []
+        info_temp_objects = []
 
         for label, channel, thermistor_type in outer_temps:
             analog_channel_list.append(channel)
+            outer_temp_objects.append(
+                Thermistor(thermistor_type, channel, THERMISTOR_APPLIED_V_CH, THERMISTOR_DIVIDER_R, label)
+            )
 
         for label, channel, thermistor_type in inner_temps:
             analog_channel_list.append(channel)
+            inner_temp_objects.append(
+                Thermistor(thermistor_type, channel, THERMISTOR_APPLIED_V_CH, THERMISTOR_DIVIDER_R, label)
+            )
 
         for label, channel, thermistor_type in info_temps:
             analog_channel_list.append(channel)
+            info_temp_objects.append(
+                Thermistor(thermistor_type, channel, THERMISTOR_APPLIED_V_CH, THERMISTOR_DIVIDER_R, label)
+            )
 
         # create and open the Labjack U3
         self.lj_dev = U3protected()
