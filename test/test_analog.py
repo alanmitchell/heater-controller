@@ -15,8 +15,8 @@ from heatercontrol.thermistor import Thermistor
 dev = U3protected()
 
 ch_list = [
-    (0, False),
     (1, True),
+    (3, True),
     (8, True),
     (15, False),
 ]
