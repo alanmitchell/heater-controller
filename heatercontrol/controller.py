@@ -194,6 +194,9 @@ class Controller(threading.Thread):
                 vals['pwm'] =  new_pwm
                 self.pwm.set_value(new_pwm)
 
+                # store a timestamp in vals
+                vals['timestamp'] =  time.time() 
+
                 # if there is a callback function to deliver the results to, call it.
                 if self.results_callback:
                     self.results_callback(vals)
