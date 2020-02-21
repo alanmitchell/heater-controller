@@ -13,7 +13,8 @@ def handle_control_results(vals):
     the controller provides the dictionary 'vals', which contains sensor
     and output values. 
     """
-    pprint(vals)
+    #pprint(vals)
+    print(f"Delta-T: {vals['delta_t']:.2f} F, PWM: {vals['pwm']:.3f}")
 
 if __name__=='__main__':
 
@@ -37,5 +38,10 @@ if __name__=='__main__':
     )
     controller.start()
     
-    while True:
-        time.sleep(1.0)
+    try:
+        while True:
+            time.sleep(1.0)
+    
+    finally:
+        # Make sure PWM is turned off when program exits.
+        controller.turn_off_pwm()
