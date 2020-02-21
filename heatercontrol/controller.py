@@ -196,6 +196,7 @@ class Controller(threading.Thread):
 
                 # calculate, use, and store the new output value from the PID controller object
                 new_pwm = self.pid(delta_t)
+                # new_pwm = 1.0 if delta_t < 0 else 0.0    # simple On/Off control
                 vals['pwm'] =  new_pwm
                 self.pwm.set_value(new_pwm)
 
