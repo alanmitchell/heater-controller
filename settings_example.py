@@ -6,12 +6,12 @@ Copy this file to user/settings.py and then modify there as appropriate.
 # tuple is:
 # (Sensor Label, Labjack Analog channel number, thermistor type from heatercontrol.thermistor.py file)
 INNER_TEMPS = (
-    ('Upper Left Inlet', 8, 'BAPI 10K-3'),
+    ('Upper Left Inlet', 8, 'Sure 10K'),
 )
 
 # List of Outer Chamber Temperature sensors.  Same format as INNER_TEMPS
 OUTER_TEMPS = (
-    ('Top', 9, 'BAPI 10K-3'),
+    ('Top', 9, 'Sure 10K'),
 )
 
 # List of Informational Temperature sensors.
@@ -34,5 +34,5 @@ INIT_PWM_MAX = 0.7
 # Range and starting value of PID parameters.
 # Format is (min value, starting value, max value)
 PID_P = (0.5, 1.5, 4.0)
-PID_I = (0.0, 0.016, 0.05)
+PID_I = (0.0, 0.02, 0.05)
 PID_D = (0.0, 0.0, 2.0)

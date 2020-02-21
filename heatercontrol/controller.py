@@ -28,7 +28,7 @@ ANALOG_READ_SPACING = 4.0     # milliseconds
 ANALOG_RING_BUFFER_SIZE = 20
 
 # Divider resistor value used in Thermistor circuits
-THERMISTOR_DIVIDER_R = 20000.0
+THERMISTOR_DIVIDER_R = 9760.0
 
 def summarize_thermistor_group(thermistors, analog_readings):
     """Returns a dictionary summarizing the temperature values for a group
@@ -90,22 +90,26 @@ class Controller(threading.Thread):
         self.info_thermistors = []
 
         for label, channel, thermistor_type in outer_temps:
-            analog_channel_list.append(channel)
+            analog_channel_list.append((channel, True))
             self.outer_thermistors.append(
                 Thermistor(thermistor_type, channel, THERMISTOR_APPLIED_V_CH, THERMISTOR_DIVIDER_R, label)
             )
 
         for label, channel, thermistor_type in inner_temps:
-            analog_channel_list.append(channel)
+            analog_channel_list.append((channel, True))
             self.inner_thermistors.append(
                 Thermistor(thermistor_type, channel, THERMISTOR_APPLIED_V_CH, THERMISTOR_DIVIDER_R, label)
             )
 
         for label, channel, thermistor_type in info_temps:
-            analog_channel_list.append(channel)
+            analog_channel_list.append((channel, True))
             self.info_thermistors.append(
                 Thermistor(thermistor_type, channel, THERMISTOR_APPLIED_V_CH, THERMISTOR_DIVIDER_R, label)
             )
+
+        # Added in the thermistor applied voltage channel to the channel list.  It
+        # has good source impedance so does not need long settling.
+        analog_channel_list.append((THERMISTOR_APPLIED_V_CH, False))
 
         # create and open the Labjack U3
         self.lj_dev = U3protected()
