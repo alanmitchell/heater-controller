@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """Main script for running the Heater Control program.
 Expects a settings.py file in the user/ folder, with the structure
 of 'settings_example.py' found in this folder.
