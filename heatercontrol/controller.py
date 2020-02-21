@@ -65,6 +65,7 @@ class Controller(threading.Thread):
             control_period,
             pwm_channel,
             pwm_period,
+            init_pwm_max,
             init_pid_p_param,
             init_pid_i_param,
             init_pid_d_param,
@@ -130,7 +131,7 @@ class Controller(threading.Thread):
             init_pid_p_param, 
             init_pid_i_param,
             init_pid_d_param,
-            1.0
+            init_pwm_max,
         )
 
     def set_control_parameters(self, 
