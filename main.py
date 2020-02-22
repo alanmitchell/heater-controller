@@ -31,11 +31,10 @@ if __name__=='__main__':
         stng.PWM_CHANNEL,
         stng.PWM_PERIOD,
         stng.INIT_PWM_MAX,
-        kp_init,
-        ki_init,
-        kd_init,
+        (kp_init, ki_init, kd_init),
         handle_control_results
     )
+    controller.enable_control = True
     controller.start()
     
     try:

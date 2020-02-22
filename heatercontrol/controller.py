@@ -66,9 +66,7 @@ class Controller(threading.Thread):
             pwm_channel,
             pwm_period,
             init_pwm_max,
-            init_pid_p_param,
-            init_pid_i_param,
-            init_pid_d_param,
+            init_pid_tunings,
             results_callback=None,
         ):
         
@@ -131,31 +129,34 @@ class Controller(threading.Thread):
 
         # Make the PID controller object and set it's initial values
         self.pid = simple_pid.PID()
-        self.set_control_parameters(
-            init_pid_p_param, 
-            init_pid_i_param,
-            init_pid_d_param,
-            init_pwm_max,
-        )
+        self.pid_tunings = init_pid_tunings
+        self.pwm_max = init_pwm_max
+        self.enable_control = False
 
-    def set_control_parameters(self, 
-            pid_p_param,
-            pid_i_param,
-            pid_d_param,
-            max_pwm,
-        ):
-        """Stores and sets the PID control parameters:
-        pid_p_param:  P parameter
-        pid_i_param:  I parameter
-        pid_d_param:  D parameter
-        max_pwm:      Max limit on PWM output, 0.0 - 1.0.
-        """
-        self.pid_p_param = pid_p_param
-        self.pid_i_param = pid_i_param
-        self.pid_d_param = pid_d_param
-        self.max_pwm = min(max(0.0, max_pwm), 1.0)
-        self.pid.tunings = (pid_p_param, pid_i_param, pid_d_param)
-        self.pid.output_limits = (0.0, self.max_pwm)
+    @property
+    def pid_tunings(self):
+        return self.pid.tunings
+        
+    @pid_tunings.setter
+    def pid_tunings(self, params):
+        self.pid.tunings = params    # set tunings into PID object.
+
+    @property
+    def pwm_max(self):
+        return self._pwm_max
+
+    @pwm_max.setter
+    def pwm_max(self, val):
+        self._pwm_max = min(max(0.0, val), 1.0)
+        self.pid.output_limits = (0.0, self._pwm_max)
+
+    @property
+    def enable_control(self):
+        return self._enable_control
+    
+    @enable_control.setter
+    def enable_control(self, bool_val):
+        self._enable_control = bool_val
 
     def turn_off_pwm(self):
         """Turns off the PWM output.  Used in shutdown or error situations.
@@ -195,10 +196,13 @@ class Controller(threading.Thread):
                 vals['delta_t'] = delta_t
 
                 # calculate, use, and store the new output value from the PID controller object
-                new_pwm = self.pid(delta_t)
-                # new_pwm = 1.0 if delta_t < 0 else 0.0    # simple On/Off control
-                vals['pwm'] =  new_pwm
-                self.pwm.set_value(new_pwm)
+                if self.enable_control:
+                    new_pwm = self.pid(delta_t)
+                    # new_pwm = 1.0 if delta_t < 0 else 0.0    # simple On/Off control
+                    vals['pwm'] =  new_pwm
+                    self.pwm.set_value(new_pwm)
+                else:
+                    self.turn_off_pwm()
 
                 # store a timestamp in vals
                 vals['timestamp'] =  time.time() 
@@ -216,5 +220,3 @@ class Controller(threading.Thread):
                 # This does not account for above processing time.  If that is not
                 # short, recode to set an absolute time to wait for before proceeding.
                 time.sleep(self.control_period)
-
-
