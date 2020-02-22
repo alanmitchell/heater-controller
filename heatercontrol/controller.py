@@ -131,6 +131,7 @@ class Controller(threading.Thread):
         self.pid = simple_pid.PID()
         self.pid_tunings = init_pid_tunings
         self.pwm_max = init_pwm_max
+        self.enable_on_off_control = False
         self.enable_control = False
 
     @property
