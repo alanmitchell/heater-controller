@@ -158,6 +158,14 @@ class Controller(threading.Thread):
     def enable_control(self, bool_val):
         self._enable_control = bool_val
 
+    @property
+    def enable_on_off_control(self):
+        return self._enable_on_off_control
+
+    @enable_on_off_control.setter
+    def enable_on_off_control(self, bool_val):
+        self._enable_on_off_control = bool_val
+
     def turn_off_pwm(self):
         """Turns off the PWM output.  Used in shutdown or error situations.
         """
@@ -197,13 +205,15 @@ class Controller(threading.Thread):
 
                 # calculate, use, and store the new output value from the PID controller object
                 if self.enable_control:
-                    new_pwm = self.pid(delta_t)
-                    # new_pwm = 1.0 if delta_t < 0 else 0.0    # simple On/Off control
+                    if self.enable_on_off_control:
+                        new_pwm = 1.0 if delta_t < 0 else 0.0    # simple On/Off control
+                    else:
+                        new_pwm = self.pid(delta_t)
                     vals['pwm'] =  new_pwm
                     self.pwm.set_value(new_pwm)
                 else:
-                    self.pwm.set_value(0.0)
                     vals['pwm'] = 0.0
+                    self.pwm.set_value(0.0)
 
                 # store a timestamp in vals
                 vals['timestamp'] =  time.time() 
