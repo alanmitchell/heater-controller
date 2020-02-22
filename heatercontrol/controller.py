@@ -202,7 +202,8 @@ class Controller(threading.Thread):
                     vals['pwm'] =  new_pwm
                     self.pwm.set_value(new_pwm)
                 else:
-                    self.turn_off_pwm()
+                    self.pwm.set_value(0.0)
+                    vals['pwm'] = 0.0
 
                 # store a timestamp in vals
                 vals['timestamp'] =  time.time() 
