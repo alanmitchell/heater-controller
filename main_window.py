@@ -61,12 +61,13 @@ class MainWindow(QWidget):
         pid_group.setLayout(pid_form)
         control_layout.addWidget(pid_group)
         # handle change in PID tuning sliders
-        self.slider_kp.valueChanged.connect(pid_tuning_change)
-        self.slider_ki.valueChanged.connect(pid_tuning_change)
-        self.slider_kd.valueChanged.connect(pid_tuning_change)
+        self.slider_kp.valueChanged.connect(self.pid_tuning_change)
+        self.slider_ki.valueChanged.connect(self.pid_tuning_change)
+        self.slider_kd.valueChanged.connect(self.pid_tuning_change)
 
         control_layout.addSpacing(10)
         self.slider_heater_max = SliderWithVal((0.0, 1.0), stng.INIT_PWM_MAX, 2)
+        self.slider_heater_max.valueChanged.connect(self.heater_max_change)
         control_layout.addWidget(QLabel('Maximum Heater Output\n(% of Full Capacity)'))
         control_layout.addWidget(self.slider_heater_max)
 
@@ -102,6 +103,10 @@ class MainWindow(QWidget):
         self.controller.enable_control = True
         self.controller.start()
 
+    def closeEvent(self, event):
+        # Turn off heater when this window is closed.
+        self.controller.turn_off_pwm()
+
     def pid_tuning_change(self, _):
         """One of the PID tuning sliders changed.
         """
@@ -123,7 +128,12 @@ def main():
     main.move(0, 0)
     main.show()
 
-    sys.exit(app.exec_())
+    try:
+        sys.exit(app.exec_())
+
+    finally:
+        # make sure Heater is turned off
+        main.controller.turn_off_pwm()
 
 if __name__=='__main__':
     main()

@@ -166,7 +166,12 @@ class Controller(threading.Thread):
     @enable_on_off_control.setter
     def enable_on_off_control(self, bool_val):
         self._enable_on_off_control = bool_val
-
+        
+    def reset_pid(self):
+        """Resets PID state parameters.
+        """
+        self.pid.reset()
+        
     def turn_off_pwm(self):
         """Turns off the PWM output.  Used in shutdown or error situations.
         """

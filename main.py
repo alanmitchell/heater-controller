@@ -35,6 +35,7 @@ if __name__=='__main__':
         handle_control_results
     )
     controller.enable_control = True
+    controller.enable_on_off_control = False
     controller.start()
     
     try:
