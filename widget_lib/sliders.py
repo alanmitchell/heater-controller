@@ -49,18 +49,24 @@ class SliderWithVal(QWidget):
         
         self.setLayout(layout)
 
-        self.slider.valueChanged.connect(self.valuechange)
+        self.slider.valueChanged.connect(self._valuechange)
 
         self.val_range = val_range
         self.value = init_val
+        self._valuechange()
 
-    def valuechange(self):
+    def _valuechange(self):
         """Handles a change in value of the slider.  Sets the value label and
         emits the custom signal.
         """
         val = self.value
         self.val_label.setText(f'{val:.{self.dec_places}f}')
         self.valueChanged.emit(val)
+
+    def setEnabled(self, bool_val):
+        """Sets the enabled state of the slider.
+        """
+        self.slider.setEnabled(bool_val)
 
     @property
     def val_range(self):
