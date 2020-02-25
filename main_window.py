@@ -8,8 +8,9 @@ import os
 import time
 from datetime import datetime
 from pprint import pprint
+import json
 
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
         QGroupBox, QHBoxLayout, QVBoxLayout, QLabel,
         QPushButton, QSizePolicy, QMessageBox,
@@ -49,7 +50,8 @@ class MainWindow(QWidget):
             stng.PWM_PERIOD,
             stng.INIT_PWM_MAX,
             (kp_init, ki_init, kd_init),
-            self.handle_control_results
+            None
+            #self.handle_control_results
         )
 
         self.plotDelta = SimplePlot('Minute (0 = Now)', 'Inner - Outer Temp (°F)')
@@ -126,11 +128,20 @@ class MainWindow(QWidget):
         self.setGeometry(1000, 800, 1000, 800)
         self.setWindowTitle('Heater Controller')
 
-        # the current index into the logging arrays
+        # the current index into the plotting arrays
+        self.plot_ix = 0
+
+        # index to keep track of when to log to file
         self.log_ix = 0
 
         # Start the controller
         self.controller.start()
+
+        # Start a timer to update plots in this GUI
+        self.plot_timer = QTimer()
+        self.plot_timer.setInterval(int(stng.PLOT_TIME_INTERVAL * 1000))
+        self.plot_timer.timeout.connect(self.handle_control_results)
+        self.plot_timer.start()
 
     def closeEvent(self, event):
         # Turn off heater when this window is closed.
@@ -183,21 +194,41 @@ class MainWindow(QWidget):
         'val_list':  is the ring buffer that values are drawn from.
         self.log_ix indicates the index of the last element to plot.
         """
-        return val_list[self.log_ix + 1:] + val_list[:self.log_ix]
+        return val_list[self.plot_ix + 1:] + val_list[:self.plot_ix + 1]
 
-    def handle_control_results(self, vals):
+    def make_plot_data_list(self, first_value):
+        """Returns a list with length of the GRAPH_POINTS value from the settings
+        file.  'first_value' is used to fill the entire list.
+        """
+        return [first_value] * stng.GRAPH_POINTS
+
+    def handle_control_results(self):
+        """Does all the plotting and logging of the control results
+        """
+
+        try:
+            vals = self.controller.current_results
+        except:
+            print('Controller Results not ready yet.')
+            return
 
         try: 
-            self.delta_t     # will error if this is the first pass
+            self.delta_t     # this will error if this is the first pass
 
-            self.timestamp[self.log_ix] =  vals['timestamp']
-            self.delta_t[self.log_ix] = vals['delta_t']
-            self.pwm[self.log_ix] = vals['pwm']
+            # record entire results dictionary into a list.
+            self.control_results[self.plot_ix] = vals
+
+            # log to file if it is time.  Entire 'vals' dictionary is written to file,
+            # using the repr string of the dictionary.  It can be read in and converted 
+            # back to a dictionary with the eval() function.
+            if self.log_ix % stng.LOG_INTERVAL == 0:
+                with open(f'logs/{self.log_file_name}', 'a') as fout:
+                    fout.write(repr(vals) + '\n')
             
-            self.inner_average[self.log_ix] = vals['inner']['average']
-            self.outer_average[self.log_ix] = vals['outer']['average']
-            self.info_average[self.log_ix] = vals['info']['average']
-
+            self.timestamp[self.plot_ix] =  vals['timestamp']
+            self.delta_t[self.plot_ix] = vals['delta_t']
+            self.pwm[self.plot_ix] = vals['pwm']
+            
             now_ts = time.time()
             ts = list((self.timestamp - now_ts) / 60.0)
 
@@ -217,20 +248,17 @@ class MainWindow(QWidget):
             pg.QtGui.QApplication.processEvents()
 
         except:
-            self.timestamp = np.array(vals['timestamp'] * np.ones(stng.GRAPH_POINTS))
-            self.delta_t = [vals['delta_t']] * stng.GRAPH_POINTS
-            self.pwm = [vals['pwm']] * stng.GRAPH_POINTS
-
-            self.inner_average = [vals['inner']['average']] * stng.GRAPH_POINTS
-            self.outer_average = [vals['outer']['average']] * stng.GRAPH_POINTS
-            self.info_average = [vals['info']['average']] * stng.GRAPH_POINTS
-
+            self.control_results = self.make_plot_data_list(vals)    # creates array to hold entire results dictionary
+            self.timestamp = np.array(self.make_plot_data_list(vals['timestamp']))
+            self.delta_t = self.make_plot_data_list(vals['delta_t'])
+            self.pwm = self.make_plot_data_list(vals['pwm'])
 
             self.delta_t_line = self.plotDelta.plot([], [], pen=pg.mkPen(color=(0, 0, 255), width=3))
             self.pwm_line = self.plotPWM.plot([], [], pen=pg.mkPen(color=(255, 0, 0), width=3))
 
         finally:
-            self.log_ix = (self.log_ix + 1) % stng.GRAPH_POINTS
+            self.plot_ix = (self.plot_ix + 1) % stng.GRAPH_POINTS
+            self.log_ix = (self.log_ix + 1) % stng.LOG_INTERVAL
 
         print(f"Delta-T: {vals['delta_t']:.2f} F, PWM: {vals['pwm']:.3f}")
 
