@@ -171,7 +171,7 @@ class Controller(threading.Thread):
         """Resets PID state parameters.
         """
         self.pid.reset()
-        
+
     def turn_off_pwm(self):
         """Turns off the PWM output.  Used in shutdown or error situations.
         """
@@ -212,7 +212,7 @@ class Controller(threading.Thread):
                 # calculate, use, and store the new output value from the PID controller object
                 if self.enable_control:
                     if self.enable_on_off_control:
-                        new_pwm = 1.0 if delta_t < 0 else 0.0    # simple On/Off control
+                        new_pwm = self.pwm_max if delta_t < 0 else 0.0    # simple On/Off control
                     else:
                         new_pwm = self.pid(delta_t)
                     vals['pwm'] =  new_pwm
