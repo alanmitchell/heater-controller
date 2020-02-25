@@ -47,9 +47,9 @@ def summarize_thermistor_group(thermistors, analog_readings):
     for therm in thermistors:
         temp = therm.temperature(analog_readings)
         temps.append(temp)
-        result['detail'].append( (therm.label, temp) )
+        result['detail'].append( (therm.label, round(temp, 2)) )
     if len(temps):
-        result['average'] = sum(temps) / len(temps)
+        result['average'] = round(sum(temps) / len(temps), 2)
     else:
         result['average'] = np.nan
     
@@ -166,6 +166,12 @@ class Controller(threading.Thread):
     @enable_on_off_control.setter
     def enable_on_off_control(self, bool_val):
         self._enable_on_off_control = bool_val
+
+    @property
+    def current_results(self):
+        """Returns a dictionary of the most current inputs and outputs from the controller.
+        """
+        return self._current_results
         
     def reset_pid(self):
         """Resets PID state parameters.
@@ -207,7 +213,7 @@ class Controller(threading.Thread):
                 # calculate the delta-temperature between inner and outer chamber and save
                 # it in the vals dictionary.
                 delta_t = vals['inner']['average'] -  vals['outer']['average']
-                vals['delta_t'] = delta_t
+                vals['delta_t'] = round(delta_t, 2)
 
                 # calculate, use, and store the new output value from the PID controller object
                 if self.enable_control:
@@ -215,14 +221,17 @@ class Controller(threading.Thread):
                         new_pwm = self.pwm_max if delta_t < 0 else 0.0    # simple On/Off control
                     else:
                         new_pwm = self.pid(delta_t)
-                    vals['pwm'] =  new_pwm
+                    vals['pwm'] =  round(new_pwm, 3)
                     self.pwm.set_value(new_pwm)
                 else:
                     vals['pwm'] = 0.0
                     self.pwm.set_value(0.0)
 
                 # store a timestamp in vals
-                vals['timestamp'] =  time.time() 
+                vals['timestamp'] =  round(time.time(), 3)
+
+                # save this as an attribute
+                self._current_results = vals
 
                 # if there is a callback function to deliver the results to, call it.
                 if self.results_callback:
