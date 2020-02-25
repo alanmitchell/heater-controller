@@ -1,3 +1,6 @@
+"""Customized Plot Widgets.
+"""
+
 from pyqtgraph import PlotWidget
 import pyqtgraph as pg
 

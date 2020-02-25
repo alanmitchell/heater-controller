@@ -188,10 +188,15 @@ class MainWindow(QWidget):
     def handle_control_results(self, vals):
 
         try: 
-            self.delta_t
+            self.delta_t     # will error if this is the first pass
+
             self.timestamp[self.log_ix] =  vals['timestamp']
             self.delta_t[self.log_ix] = vals['delta_t']
-            self.pwm[self.log_ix] =  vals['pwm']
+            self.pwm[self.log_ix] = vals['pwm']
+            
+            self.inner_average[self.log_ix] = vals['inner']['average']
+            self.outer_average[self.log_ix] = vals['outer']['average']
+            self.info_average[self.log_ix] = vals['info']['average']
 
             now_ts = time.time()
             ts = list((self.timestamp - now_ts) / 60.0)
@@ -208,12 +213,18 @@ class MainWindow(QWidget):
             self.delta_t_line.setData(plot_ts, plot_delta_t)
             self.pwm_line.setData(plot_ts, plot_pwm)
 
-            QApplication.processEvents()
+            # Needed to update widgets to keep the plot refreshing.
+            pg.QtGui.QApplication.processEvents()
 
         except:
             self.timestamp = np.array(vals['timestamp'] * np.ones(stng.GRAPH_POINTS))
             self.delta_t = [vals['delta_t']] * stng.GRAPH_POINTS
             self.pwm = [vals['pwm']] * stng.GRAPH_POINTS
+
+            self.inner_average = [vals['inner']['average']] * stng.GRAPH_POINTS
+            self.outer_average = [vals['outer']['average']] * stng.GRAPH_POINTS
+            self.info_average = [vals['info']['average']] * stng.GRAPH_POINTS
+
 
             self.delta_t_line = self.plotDelta.plot([], [], pen=pg.mkPen(color=(0, 0, 255), width=3))
             self.pwm_line = self.plotPWM.plot([], [], pen=pg.mkPen(color=(255, 0, 0), width=3))
