@@ -20,19 +20,29 @@ INFO_TEMPS = (
 )
 
 # Amount of time between updating the PWM heater output
-CONTROL_PERIOD = 3.0      # seconds
+CONTROL_PERIOD = 0.3      # seconds
 
 # PWM Digital Output channel number on Labjack
 PWM_CHANNEL = 6
 
 # Total Period of the PWM signal in seconds
-PWM_PERIOD = 2.0   # seconds
+PWM_PERIOD = 1.0   # seconds
 
 # Initial PWM max level setting
-INIT_PWM_MAX = 0.7
+INIT_PWM_MAX = 1.0
 
 # Range and starting value of PID parameters.
 # Format is (min value, starting value, max value)
-PID_P = (0.5, 1.5, 4.0)
-PID_I = (0.0, 0.02, 0.05)
+PID_P = (0.1, 0.3, 0.7)         # use 0.5, 1.5, 4.0 for test chamber
+PID_I = (0.0, 0.04, 0.08)       # use 0.02 for test chamber
 PID_D = (0.0, 0.0, 2.0)
+
+# Time spacing between plot points in seconds
+PLOT_TIME_INTERVAL = 0.5       # seconds
+
+# Total number of points to show on the graphs.
+GRAPH_POINTS = 120
+
+# Interval between log points, mesured in plot points, i.e.
+# a value of 4 means log every 4th plot point.
+LOG_INTERVAL = 6
