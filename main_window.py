@@ -14,6 +14,8 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
         QGroupBox, QHBoxLayout, QVBoxLayout, QLabel,
         QPushButton, QSizePolicy, QMessageBox,
         QVBoxLayout, QWidget, QFormLayout)
+import pyqtgraph as pg
+import numpy as np
 
 from widget_lib.sliders import SliderWithVal
 from widget_lib.plots import SimplePlot
@@ -51,14 +53,14 @@ class MainWindow(QWidget):
         )
 
         self.plotDelta = SimplePlot('Minute (0 = Now)', 'Inner - Outer Temp (°F)')
-        self.plotHeater = SimplePlot('Minute (0 = Now)', 'Heater Output, % of Max')
-        self.plotHeater.setYRange(0.0, 1.03, padding=0)
+        self.plotPWM = SimplePlot('Minute (0 = Now)', 'Heater Output, % of Max')
+        self.plotPWM.setYRange(0.0, 1.03, padding=0)
         self.plotTemperature = SimplePlot('Minute (0 = Now)', 'Temperature (°F)')
         self.plotTemperature.addLegend()
         
         graph_layout = QVBoxLayout()
         graph_layout.addWidget(self.plotDelta)
-        graph_layout.addWidget(self.plotHeater)
+        graph_layout.addWidget(self.plotPWM)
         graph_layout.addWidget(self.plotTemperature)
 
         controls = QWidget()
@@ -124,6 +126,9 @@ class MainWindow(QWidget):
         self.setGeometry(1000, 800, 1000, 800)
         self.setWindowTitle('Heater Controller')
 
+        # the current index into the logging arrays
+        self.log_ix = 0
+
         # Start the controller
         self.controller.start()
 
@@ -136,12 +141,12 @@ class MainWindow(QWidget):
 
     def enable_on_off_change(self):
         self.controller.enable_on_off_control = self.check_enable_on_off.isChecked()
+        self.controller.reset_pid()
 
     def pid_tuning_change(self, _):
         """One of the PID tuning sliders changed.
         """
         tunings = (self.slider_kp.value, self.slider_ki.value, self.slider_kd.value)
-        print(tunings)
         self.controller.pid_tunings = tunings
 
     def heater_max_change(self, _):
@@ -172,15 +177,57 @@ class MainWindow(QWidget):
         self.slider_kd.value = self.kd_init
         self.controller.reset_pid()
 
+    def plot_list(self, val_list):
+        """Returns a list that contains the elements to plot for the current moment
+        in time.
+        'val_list':  is the ring buffer that values are drawn from.
+        self.log_ix indicates the index of the last element to plot.
+        """
+        return val_list[self.log_ix + 1:] + val_list[:self.log_ix]
+
     def handle_control_results(self, vals):
+
+        try: 
+            self.delta_t
+            self.timestamp[self.log_ix] =  vals['timestamp']
+            self.delta_t[self.log_ix] = vals['delta_t']
+            self.pwm[self.log_ix] =  vals['pwm']
+
+            now_ts = time.time()
+            ts = list((self.timestamp - now_ts) / 60.0)
+
+            plot_ts = self.plot_list(ts)
+            plot_delta_t = self.plot_list(self.delta_t)
+            plot_pwm = self.plot_list(self.pwm)
+
+            if max(plot_delta_t) < 2.5 and min(plot_delta_t) > -2.5:
+                self.plotDelta.setYRange(-2.5, 2.5)
+            else:
+                self.plotDelta.enableAutoRange()
+
+            self.delta_t_line.setData(plot_ts, plot_delta_t)
+            self.pwm_line.setData(plot_ts, plot_pwm)
+
+            QApplication.processEvents()
+
+        except:
+            self.timestamp = np.array(vals['timestamp'] * np.ones(stng.GRAPH_POINTS))
+            self.delta_t = [vals['delta_t']] * stng.GRAPH_POINTS
+            self.pwm = [vals['pwm']] * stng.GRAPH_POINTS
+
+            self.delta_t_line = self.plotDelta.plot([], [], pen=pg.mkPen(color=(0, 0, 255), width=3))
+            self.pwm_line = self.plotPWM.plot([], [], pen=pg.mkPen(color=(255, 0, 0), width=3))
+
+        finally:
+            self.log_ix = (self.log_ix + 1) % stng.GRAPH_POINTS
 
         print(f"Delta-T: {vals['delta_t']:.2f} F, PWM: {vals['pwm']:.3f}")
 
 
 def main():
+
     app = QApplication(sys.argv)
     main = MainWindow()
-    #main.slider_kd.setEnabled(False)
     main.move(0, 40)
     main.show()
 
