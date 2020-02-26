@@ -24,6 +24,21 @@ from widget_lib.plots import SimplePlot
 import user.settings as stng
 from heatercontrol.controller import Controller
 
+def make_temp_list(setting_temp_list, cat_name):
+    """Returns a list with items that can be used to fill a combo box containing
+    temperature names and keys.  The items in the list are two-tuples: 
+    (sensor label, sensor key into current results nested dictionary).
+    """
+    
+    if len(setting_temp_list) == 0:
+        return []
+    
+    ret_list = [ (f'{cat_name}: Average', (cat_name.lower(), 'average'))]
+    for sensor_label, _, _ in setting_temp_list:
+        ret_list.append( (f'{cat_name}: {sensor_label}', (cat_name.lower(), 'detail', sensor_label)) )
+
+    return ret_list
+
 class MainWindow(QWidget):
 
     def __init__(self, *args, **kwargs):
@@ -54,15 +69,50 @@ class MainWindow(QWidget):
             #self.handle_control_results
         )
 
-        self.plotDelta = SimplePlot('Minute (0 = Now)', 'Inner - Outer Temp (°F)')
+        self.plotDelta = SimplePlot('Minute (0 = Now)', 'Inner - Outer (°F)')
         self.plotPWM = SimplePlot('Minute (0 = Now)', 'Heater Output, % of Max')
         self.plotPWM.setYRange(0.0, 1.03, padding=0)
         self.plotTemperature = SimplePlot('Minute (0 = Now)', 'Temperature (°F)')
         self.plotTemperature.addLegend()
         
+        # combos to select the two sensors to plot on the bottom graph.
+        self.combo_sensor1 = QComboBox()
+        lbl_sensor1 = QLabel('Sensor 1:')
+        lbl_sensor1.setBuddy(self.combo_sensor1)
+        self.combo_sensor2 = QComboBox()
+        lbl_sensor2 = QLabel('Sensor 2:')
+        lbl_sensor2.setBuddy(self.combo_sensor2)
+
+        # Make a list of all the temperature sensors and their associated dictionary
+        # keys to populate the combo boxes with.
+        temp_list = make_temp_list(stng.INNER_TEMPS, 'Inner')
+        temp_list += make_temp_list(stng.OUTER_TEMPS, 'Outer')
+        temp_list += make_temp_list(stng.INFO_TEMPS, 'Info')
+        # fill the combos and select the starting temperature values.
+        ix = 0
+        for lbl, data in temp_list:
+            if data == ('inner', 'average'):
+                combo1_ix = ix
+            if data == ('outer', 'average'):
+                combo2_ix = ix
+            self.combo_sensor1.addItem(lbl, data)
+            self.combo_sensor2.addItem(lbl, data)
+            ix += 1
+        self.combo_sensor1.setCurrentIndex(combo1_ix)
+        self.combo_sensor2.setCurrentIndex(combo2_ix)
+
+        sensor_box = QHBoxLayout()
+        sensor_box.addWidget(lbl_sensor1)
+        sensor_box.addWidget(self.combo_sensor1)
+        sensor_box.addSpacing(30)
+        sensor_box.addWidget(lbl_sensor2)
+        sensor_box.addWidget(self.combo_sensor2)
+        sensor_box.addStretch(1)
+
         graph_layout = QVBoxLayout()
         graph_layout.addWidget(self.plotDelta)
         graph_layout.addWidget(self.plotPWM)
+        graph_layout.addLayout(sensor_box)
         graph_layout.addWidget(self.plotTemperature)
 
         controls = QWidget()
@@ -186,7 +236,7 @@ class MainWindow(QWidget):
         self.slider_kp.value = self.kp_init
         self.slider_ki.value = self.ki_init
         self.slider_kd.value = self.kd_init
-        self.controller.reset_pid()
+        # self.controller.reset_pid()     # This resets integral and causes a big drop in output.
 
     def plot_list(self, val_list):
         """Returns a list that contains the elements to plot for the current moment
@@ -202,6 +252,27 @@ class MainWindow(QWidget):
         """
         return [first_value] * stng.GRAPH_POINTS
 
+    def extract_a_sensor(self, key_to_sensor: tuple):
+        """Returns a list of sensor values extracted from the control_results
+        list.  'key_to_sensor' is a tuple of dictionary keys that leads to the
+        sesor value within control_results.  The tuple can have one, two, or three
+        items as that is the range of depth in the nested dictionary of control results.
+        """
+        if len(key_to_sensor) == 3:
+            k1, k2, k3 = key_to_sensor
+            return [item[k1][k2][k3] for item in self.control_results]
+
+        elif len(key_to_sensor) == 2:
+            k1, k2 = key_to_sensor
+            return [item[k1][k2] for item in self.control_results]
+
+        elif len(key_to_sensor) == 1:
+            k1 = key_to_sensor[0]
+            return [item[k1] for item in self.control_results]
+
+        else:
+            raise ValueError('Invalid key into Control Results list: {key_to_sensor}')
+
     def handle_control_results(self):
         """Does all the plotting and logging of the control results
         """
@@ -212,8 +283,14 @@ class MainWindow(QWidget):
             print('Controller Results not ready yet.')
             return
 
+        # get the keys and labels for the two sensors to plot
+        sensor1_key = self.combo_sensor1.currentData()
+        sensor1_label = self.combo_sensor1.currentText()
+        sensor2_key = self.combo_sensor2.currentData()
+        sensor2_label = self.combo_sensor2.currentText()
+
         try: 
-            self.delta_t     # this will error if this is the first pass
+            self.delta_t     # this statement will error if this is the first pass
 
             # record entire results dictionary into a list.
             self.control_results[self.plot_ix] = vals
@@ -236,18 +313,25 @@ class MainWindow(QWidget):
             plot_delta_t = self.plot_list(self.delta_t)
             plot_pwm = self.plot_list(self.pwm)
 
+            plot_temp1 = self.plot_list(self.extract_a_sensor(sensor1_key))
+            plot_temp2 = self.plot_list(self.extract_a_sensor(sensor2_key))
+
             if max(plot_delta_t) < 2.5 and min(plot_delta_t) > -2.5:
                 self.plotDelta.setYRange(-2.5, 2.5)
             else:
                 self.plotDelta.enableAutoRange()
+            self.plotPWM.setYRange(0.0, 1.0)
 
             self.delta_t_line.setData(plot_ts, plot_delta_t)
             self.pwm_line.setData(plot_ts, plot_pwm)
+            self.temperature_line1.setData(plot_ts, plot_temp1)
+            self.temperature_line2.setData(plot_ts, plot_temp2)
 
             # Needed to update widgets to keep the plot refreshing.
             pg.QtGui.QApplication.processEvents()
 
-        except:
+        except Exception as e:
+            # print(e)
             self.control_results = self.make_plot_data_list(vals)    # creates array to hold entire results dictionary
             self.timestamp = np.array(self.make_plot_data_list(vals['timestamp']))
             self.delta_t = self.make_plot_data_list(vals['delta_t'])
@@ -255,6 +339,12 @@ class MainWindow(QWidget):
 
             self.delta_t_line = self.plotDelta.plot([], [], pen=pg.mkPen(color=(0, 0, 255), width=3))
             self.pwm_line = self.plotPWM.plot([], [], pen=pg.mkPen(color=(255, 0, 0), width=3))
+            self.temperature_line1 = self.plotTemperature.plot([], [], 
+                                                        name='Sensor 1', 
+                                                        pen=pg.mkPen(color=(0, 0, 255), width=2))
+            self.temperature_line2 = self.plotTemperature.plot([], [], 
+                                                        name='Sensor 2', 
+                                                        pen=pg.mkPen(color=(58, 153, 106), width=2))
 
         finally:
             self.plot_ix = (self.plot_ix + 1) % stng.GRAPH_POINTS
