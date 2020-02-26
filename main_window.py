@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 from pprint import pprint
 import json
+from pathlib import Path
 
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QComboBox,
@@ -224,7 +225,11 @@ class MainWindow(QWidget):
         """
         date_str = datetime.now().strftime('%Y-%m-%d_%H%M%S')
         self.log_file_name = f'{date_str}.log'
-        self.label_log_name.setText(f'Current Log File:\n{self.log_file_name}')   
+        self.label_log_name.setText(f'Current Log File:\n{self.log_file_name}')
+
+        # Make full path to log file
+        self.log_file_path = Path(__file__).parent.resolve() / Path(f'logs/{self.log_file_name}')
+
 
     def ask_reset_pid(self):
         reply = QMessageBox.question(self, "Reset PID", "Restore Initial PID State?",
@@ -299,7 +304,7 @@ class MainWindow(QWidget):
             # using the repr string of the dictionary.  It can be read in and converted 
             # back to a dictionary with the eval() function.
             if self.log_ix % stng.LOG_INTERVAL == 0:
-                with open(f'logs/{self.log_file_name}', 'a') as fout:
+                with open(self.log_file_path, 'a') as fout:
                     fout.write(repr(vals) + '\n')
             
             self.timestamp[self.plot_ix] =  vals['timestamp']
