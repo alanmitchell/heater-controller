@@ -42,12 +42,12 @@ def summarize_thermistor_group(thermistors, analog_readings):
         acquisition device (usually Labjack).  The keys of the dictionary
         are channel numbers, and the values are voltages.
     """
-    result = {'average': 0.0, 'detail': []}
+    result = {'average': 0.0, 'detail': {}}
     temps = []     # used to calculate average temperature
     for therm in thermistors:
         temp = therm.temperature(analog_readings)
         temps.append(temp)
-        result['detail'].append( (therm.label, round(temp, 2)) )
+        result['detail'][therm.label] = round(temp, 2)
     if len(temps):
         result['average'] = round(sum(temps) / len(temps), 2)
     else:
