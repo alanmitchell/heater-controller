@@ -5,16 +5,19 @@ Copy this file to user/settings.py and then modify there as appropriate.
 # List of Inner Chamber Temperature sensors.  Format for each
 # tuple is:
 # (Sensor Label, Labjack Analog channel number, thermistor type from heatercontrol.thermistor.py file)
+# Sensor Labels must be Unique within this temperature group.
 INNER_TEMPS = (
     ('Upper Left Inlet', 8, 'Sure 10K'),
 )
 
 # List of Outer Chamber Temperature sensors.  Same format as INNER_TEMPS
+# Sensor Labels must be Unique within this temperature group.
 OUTER_TEMPS = (
     ('Top', 9, 'Sure 10K'),
 )
 
 # List of Informational Temperature sensors.
+# Sensor Labels must be Unique within this temperature group.
 INFO_TEMPS = (
 
 )
@@ -34,7 +37,7 @@ INIT_PWM_MAX = 1.0
 # Range and starting value of PID parameters.
 # Format is (min value, starting value, max value)
 PID_P = (0.1, 0.3, 0.7)         # use 0.5, 1.5, 4.0 for test chamber
-PID_I = (0.0, 0.04, 0.08)       # use 0.02 for test chamber
+PID_I = (0.0, 0.03, 0.07)       # use 0.02 for test chamber
 PID_D = (0.0, 0.0, 2.0)
 
 # Time spacing between plot points in seconds
