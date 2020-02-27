@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-"""The main GUI for the heater controller application.  Use the
-PyQt5 framework or the GUI.
+"""The main GUI for the heater controller application.  Uses the
+PyQt5 framework for the GUI.
 """
 import sys  
 import os
@@ -26,9 +26,11 @@ import user.settings as stng
 from heatercontrol.controller import Controller
 
 def make_temp_list(setting_temp_list, cat_name):
-    """Returns a list with items that can be used to fill a combo box containing
+    """Returns a list with items that can be used to fill a combo box with
     temperature names and keys.  The items in the list are two-tuples: 
-    (sensor label, sensor key into current results nested dictionary).
+    (sensor label, sensor tuple key into current results nested dictionary).
+    'setting_temp_list' is a list of thermistors from the main application
+    settings file.
     """
     
     if len(setting_temp_list) == 0:
@@ -67,8 +69,10 @@ class MainWindow(QWidget):
             stng.INIT_PWM_MAX,
             (kp_init, ki_init, kd_init),
             None
-            #self.handle_control_results
         )
+        # I discovered that I cannot create a pyqtgraph inside of the controller
+        # callback function.  It works for awhile and then freezes.  I needed to
+        # use a QTimer to add real-time graph points.
 
         self.plotDelta = SimplePlot('Minute (0 = Now)', 'Inner - Outer (°F)')
         self.plotPWM = SimplePlot('Minute (0 = Now)', 'Heater Output, % of Max')
@@ -93,9 +97,9 @@ class MainWindow(QWidget):
         ix = 0
         for lbl, data in temp_list:
             if data == ('inner', 'average'):
-                combo1_ix = ix
+                combo1_ix = ix    # default item for sensor 1
             if data == ('outer', 'average'):
-                combo2_ix = ix
+                combo2_ix = ix    # default item for sensor 2
             self.combo_sensor1.addItem(lbl, data)
             self.combo_sensor2.addItem(lbl, data)
             ix += 1
