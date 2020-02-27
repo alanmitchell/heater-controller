@@ -42,7 +42,7 @@ actual log file name:
 
 ```python
 from pprint import pprint
-from numpy import nan
+from math import nan
 
 for lin in open('2020-02-26_081245.log'):
     data = eval(lin)
