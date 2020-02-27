@@ -1,6 +1,6 @@
 # heater-controller
 
-A PID-based Electric heater controller built with Python 3.7 and the PyQT5 
+A PID-based Electric heater controller built with Python 3.7 and the PyQt5 
 GUI framework.  The controller's objective is to force a zero temperature difference
 between two spaces.  Each space can have multiple temperature sensors for better
 accuracy, and the temperature values are averaged for control purposes.
