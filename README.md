@@ -29,6 +29,10 @@ found in the root directory of the repo.
 A simple command line control program with no graphing, no logging and only text
 output is provided in the `main.py` script.
 
+**NOTE:**  *After booting the Raspberry Pi, wait at least 30 seconds before starting 
+the heater control program so that the clock on the Pi has time to sync with the
+Internet.*
+
 The `main_window.py` script logs temperature and heater output data to log files
 located in the `logs/` directory.  A new log file is created upon every fresh start
 of the `main_window.py` script.  Also, a new log file can be created by clicking
