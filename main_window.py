@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-"""The main GUI for the heater controller application.  Use the
-PyQt5 framework or the GUI.
+"""The main GUI for the heater controller application.  Uses the
+PyQt5 framework for the GUI.
 """
 import sys  
 import os
@@ -26,9 +26,11 @@ import user.settings as stng
 from heatercontrol.controller import Controller
 
 def make_temp_list(setting_temp_list, cat_name):
-    """Returns a list with items that can be used to fill a combo box containing
+    """Returns a list with items that can be used to fill a combo box with
     temperature names and keys.  The items in the list are two-tuples: 
-    (sensor label, sensor key into current results nested dictionary).
+    (sensor label, sensor tuple key into current results nested dictionary).
+    'setting_temp_list' is a list of thermistors from the main application
+    settings file.
     """
     
     if len(setting_temp_list) == 0:
@@ -41,6 +43,9 @@ def make_temp_list(setting_temp_list, cat_name):
     return ret_list
 
 class MainWindow(QWidget):
+    """The Main application window.  Uses values from the user.settings
+    file to initialize the control system.
+    """
 
     def __init__(self, *args, **kwargs):
 
@@ -69,8 +74,10 @@ class MainWindow(QWidget):
             stng.INIT_PWM_MAX,
             (kp_init, ki_init, kd_init),
             None
-            #self.handle_control_results
         )
+        # I discovered that I cannot create a pyqtgraph inside of the controller
+        # callback function.  It works for awhile and then freezes.  I needed to
+        # use a QTimer to add real-time graph points.
 
         self.plotDelta = SimplePlot('Minute (0 = Now)', 'Inner - Outer (°F)')
         self.plotPWM = SimplePlot('Minute (0 = Now)', 'Heater Output, % of Max')
@@ -95,9 +102,9 @@ class MainWindow(QWidget):
         ix = 0
         for lbl, data in temp_list:
             if data == ('inner', 'average'):
-                combo1_ix = ix
+                combo1_ix = ix    # default item for sensor 1
             if data == ('outer', 'average'):
-                combo2_ix = ix
+                combo2_ix = ix    # default item for sensor 2
             self.combo_sensor1.addItem(lbl, data)
             self.combo_sensor2.addItem(lbl, data)
             ix += 1
@@ -201,9 +208,14 @@ class MainWindow(QWidget):
         self.controller.turn_off_pwm()
 
     def enable_heater_change(self):
+        """Responds to heater enable checkbox.
+        """
         self.controller.enable_control = self.check_enable_heater.isChecked()
 
     def enable_on_off_change(self):
+        """Responds to checkbox to enable Simple On/Off control instead of
+        PID control.
+        """
         self.controller.enable_on_off_control = self.check_enable_on_off.isChecked()
         self.controller.reset_pid()
 
@@ -214,9 +226,14 @@ class MainWindow(QWidget):
         self.controller.pid_tunings = tunings
 
     def heater_max_change(self, _):
+        """Responds to a change in the slider controlling the maximum heater
+        output.
+        """
         self.controller.pwm_max = self.slider_heater_max.value
 
     def ask_new_log_file(self):
+        """Verifies that user really wants to start a new log file.
+        """
         reply = QMessageBox.question(self, "New Log File", "Start a New Log File?",
             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
@@ -234,12 +251,17 @@ class MainWindow(QWidget):
 
 
     def ask_reset_pid(self):
-        reply = QMessageBox.question(self, "Reset PID", "Restore Initial PID State?",
+        """Verifies that user really wants to reset the PID tuning parameters.
+        """
+        reply = QMessageBox.question(self, "Reset PID", "Restore Initial PID Parameters?",
             QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
         if reply == QMessageBox.Yes:
             self.reset_pid()
 
     def reset_pid(self):
+        """Resest the PID tuninig values to their original values provided by the
+        settings file.
+        """
         self.slider_kp.value = self.kp_init
         self.slider_ki.value = self.ki_init
         self.slider_kd.value = self.kd_init
@@ -262,7 +284,7 @@ class MainWindow(QWidget):
     def extract_a_sensor(self, key_to_sensor: tuple):
         """Returns a list of sensor values extracted from the control_results
         list.  'key_to_sensor' is a tuple of dictionary keys that leads to the
-        sesor value within control_results.  The tuple can have one, two, or three
+        sensor value within control_results.  The tuple can have one, two, or three
         items as that is the range of depth in the nested dictionary of control results.
         """
         if len(key_to_sensor) == 3:

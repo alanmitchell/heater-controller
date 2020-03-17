@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QSlider, QLabel)
 
 
 class SliderWithVal(QWidget):
-    """Slider with a label showing the current value.  Allows floating
+    """Slider with a label showing the current value.  Also allows floating
     point values to be used with the slider.
     """
 

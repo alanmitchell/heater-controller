@@ -46,7 +46,8 @@ class Thermistor:
     def temperature(self, readings, unit='F'):
         """Returns the thermistor temperature given a dictionary of voltage
         readings 'readings'.  Object properties give the channel numbers for
-        the thermistor voltage and the applied voltage, and the divider resistor
+        the thermistor voltage and the applied voltage, which are found in the
+        'readings' dictionary.  An object property also gives the divider resistor
         resistance.
         """
         therm_v = readings[self.therm_ch]
