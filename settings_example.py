@@ -22,6 +22,13 @@ INFO_TEMPS = (
 
 )
 
+# Divider resistor value used in Thermistor circuits
+THERMISTOR_DIVIDER_R = 20000.0
+
+# Analog Channel that reads the voltage that is applied to the
+# thermistor circuits on the Labjack
+THERMISTOR_APPLIED_V_CH = 15
+
 # Amount of time between updating the PWM heater output
 CONTROL_PERIOD = 0.3      # seconds
 

@@ -61,6 +61,8 @@ class MainWindow(QWidget):
             stng.OUTER_TEMPS,
             stng.INNER_TEMPS,
             stng.INFO_TEMPS,
+            stng.THERMISTOR_DIVIDER_R,
+            stng.THERMISTOR_APPLIED_V_CH,
             stng.CONTROL_PERIOD,
             stng.PWM_CHANNEL,
             stng.PWM_PERIOD,

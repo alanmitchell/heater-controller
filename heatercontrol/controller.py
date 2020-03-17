@@ -15,10 +15,6 @@ from heatercontrol.pwm import PWM
 from heatercontrol.analog_reader import AnalogReader
 from heatercontrol.thermistor import Thermistor
 
-# Channel that reads the voltage that is applied to the
-# thermistor circuits on the Labjack
-THERMISTOR_APPLIED_V_CH = 15
-
 # Delay in milliseconds between analog reads.  Should be long
 # enough to give the PWM control a chance to break in.
 ANALOG_READ_SPACING = 4.0     # milliseconds
@@ -26,9 +22,6 @@ ANALOG_READ_SPACING = 4.0     # milliseconds
 # Number of elements in the ring buffer for each thermistor
 # channel.
 ANALOG_RING_BUFFER_SIZE = 20
-
-# Divider resistor value used in Thermistor circuits
-THERMISTOR_DIVIDER_R = 9760.0
 
 def summarize_thermistor_group(thermistors, analog_readings):
     """Returns a dictionary summarizing the temperature values for a group
@@ -62,6 +55,8 @@ class Controller(threading.Thread):
             outer_temps,
             inner_temps,
             info_temps,
+            thermistor_divider_r,
+            thermistor_applied_v_ch,
             control_period,
             pwm_channel,
             pwm_period,
@@ -90,24 +85,24 @@ class Controller(threading.Thread):
         for label, channel, thermistor_type in outer_temps:
             analog_channel_list.append((channel, True))
             self.outer_thermistors.append(
-                Thermistor(thermistor_type, channel, THERMISTOR_APPLIED_V_CH, THERMISTOR_DIVIDER_R, label)
+                Thermistor(thermistor_type, channel, thermistor_applied_v_ch, thermistor_divider_r, label)
             )
 
         for label, channel, thermistor_type in inner_temps:
             analog_channel_list.append((channel, True))
             self.inner_thermistors.append(
-                Thermistor(thermistor_type, channel, THERMISTOR_APPLIED_V_CH, THERMISTOR_DIVIDER_R, label)
+                Thermistor(thermistor_type, channel, thermistor_applied_v_ch, thermistor_divider_r, label)
             )
 
         for label, channel, thermistor_type in info_temps:
             analog_channel_list.append((channel, True))
             self.info_thermistors.append(
-                Thermistor(thermistor_type, channel, THERMISTOR_APPLIED_V_CH, THERMISTOR_DIVIDER_R, label)
+                Thermistor(thermistor_type, channel, thermistor_applied_v_ch, thermistor_divider_r, label)
             )
 
         # Added in the thermistor applied voltage channel to the channel list.  It
         # has good source impedance so does not need long settling.
-        analog_channel_list.append((THERMISTOR_APPLIED_V_CH, False))
+        analog_channel_list.append((thermistor_applied_v_ch, False))
 
         # create and open the Labjack U3
         self.lj_dev = U3protected()
