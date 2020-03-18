@@ -25,7 +25,7 @@ to compensate for my slow cadence.
 
 <a href="https://www.loom.com/share/a49c79fb7866486d87d770ab5606fea5"> <p>Hardware/Software Tutorial - Watch Video</p> <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/a49c79fb7866486d87d770ab5606fea5-with-play.gif"> </a>
 
-[Here is the circuit diagram](docs/SSR_Driver.pdf) of the solid state relay (SSR) driver board that was shown in the utility.  Note that the LEDs were not discussed 
+[Here is the circuit diagram](docs/images/SSR_Driver.pdf) of the solid state relay (SSR) driver board that was shown in the utility.  Note that the LEDs were not discussed 
 in the video.  The green LED on the board lights when the software is calling 
 for heater output.  The red LED lights when the SSR is actually powered.  It may not
 be lit when the green LED is On because of the On/Off switch or the safety cutout.
