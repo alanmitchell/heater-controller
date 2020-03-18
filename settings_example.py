@@ -7,19 +7,26 @@ Copy this file to user/settings.py and then modify there as appropriate.
 # (Sensor Label, Labjack Analog channel number, thermistor type from heatercontrol.thermistor.py file)
 # Sensor Labels must be Unique within this temperature group.
 INNER_TEMPS = (
-    ('Upper Left Inlet', 8, 'Sure 10K'),
+    ('Upper Inlet', 8, 'TDK 5K'),
+    ('Lower Left Inlet', 9, 'TDK 5K'),
+    ('Lower Right Inlet', 10, 'TDK 5K'),
 )
 
 # List of Outer Chamber Temperature sensors.  Same format as INNER_TEMPS
 # Sensor Labels must be Unique within this temperature group.
 OUTER_TEMPS = (
-    ('Top', 9, 'Sure 10K'),
+    ('Top', 0, 'TDK 5K'),
+    ('West Side', 1, 'TDK 5K'),
+    ('East Side', 2, 'TDK 5K'),
 )
 
 # List of Informational Temperature sensors.
 # Sensor Labels must be Unique within this temperature group.
 INFO_TEMPS = (
-
+    ('Top Inner', 11, 'TDK 5K'),
+    ('West Side Inner', 12, 'TDK 5K'),
+    ('East Side Inner', 13, 'TDK 5K'),
+    ('South Side Inner', 14, 'TDK 5K'),
 )
 
 # Divider resistor value used in Thermistor circuits
