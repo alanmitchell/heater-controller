@@ -22,7 +22,7 @@ Here is a Video that shows typical hardware used with the controller software
 and walks through the process of setting up and operating the software. 27 minutes
 long, but most software issues are addressed.
 
-[Harware/Software Video Tutorial (27 minutes)](https://www.loom.com/share/a49c79fb7866486d87d770ab5606fea5)
+<a href="https://www.loom.com/share/a49c79fb7866486d87d770ab5606fea5"> <p>Hardware/Software Tutorial - Watch Video</p> <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/a49c79fb7866486d87d770ab5606fea5-with-play.gif"> </a>
 
 Use of the program requires that a `settings.py` file be present in the `user/`
 directory.  A sample `settings.py` file is provided in the root directory of
