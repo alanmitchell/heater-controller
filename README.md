@@ -18,6 +18,12 @@ Here is a screenshot of the program in operation.  Graphs update in realtime.
 
 ![Screenshot](docs/images/screen_shot.png)
 
+Here is a Video that shows typical hardware used with the controller software
+and walks through the process of setting up and operating the software. 27 minutes
+long, but most software issues are addressed.
+
+[Harware/Software Video Tutorial (27 minutes)](https://www.loom.com/share/a49c79fb7866486d87d770ab5606fea5)
+
 Use of the program requires that a `settings.py` file be present in the `user/`
 directory.  A sample `settings.py` file is provided in the root directory of
 this repo and named `settings_example.py`.  This example file should be copied
