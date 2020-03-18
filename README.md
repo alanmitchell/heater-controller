@@ -19,10 +19,16 @@ Here is a screenshot of the program in operation.  Graphs update in realtime.
 ![Screenshot](docs/images/screen_shot.png)
 
 Here is a Video that shows typical hardware used with the controller software
-and walks through the process of setting up and operating the software. 27 minutes
-long, but most software issues are addressed.
+and walks through the process of setting up and operating the software. It's 27 minutes
+long, but most software issues are addressed.  Try watching at 1.2x or 1.5x speed
+to compensate for my slow cadence.
 
 <a href="https://www.loom.com/share/a49c79fb7866486d87d770ab5606fea5"> <p>Hardware/Software Tutorial - Watch Video</p> <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/a49c79fb7866486d87d770ab5606fea5-with-play.gif"> </a>
+
+[Here is the circuit diagram](docs/SSR_Driver.pdf) of the solid state relay (SSR) driver board that was shown in the utility.  Note that the LEDs were not discussed 
+in the video.  The green LED on the board lights when the software is calling 
+for heater output.  The red LED lights when the SSR is actually powered.  It may not
+be lit when the green LED is On because of the On/Off switch or the safety cutout.
 
 Use of the program requires that a `settings.py` file be present in the `user/`
 directory.  A sample `settings.py` file is provided in the root directory of
