@@ -61,6 +61,10 @@ class MainWindow(QWidget):
         self.ki_init = ki_init
         self.kd_init = kd_init
 
+        # get the outer temperature averaging periods from the settings file, but
+        # if not present (recent addition to settings file), assume no averaging.
+        outer_avg_periods = stng.OUTER_ROLLING_PERIODS if hasattr(stng, 'ROLLING_PERIODS') else 1
+
         #  make a controller object
         self.controller = Controller(
             stng.OUTER_TEMPS,
@@ -69,6 +73,7 @@ class MainWindow(QWidget):
             stng.THERMISTOR_DIVIDER_R,
             stng.THERMISTOR_APPLIED_V_CH,
             stng.CONTROL_PERIOD,
+            outer_avg_periods,
             stng.PWM_CHANNEL,
             stng.PWM_PERIOD,
             stng.INIT_PWM_MAX,

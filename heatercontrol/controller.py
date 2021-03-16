@@ -14,6 +14,7 @@ from heatercontrol.U3protected import U3protected
 from heatercontrol.pwm import PWM
 from heatercontrol.analog_reader import AnalogReader
 from heatercontrol.thermistor import Thermistor
+from heatercontrol.rolling_average import RollingAverage
 
 # Delay in milliseconds between analog reads.  Should be long
 # enough to give the PWM control a chance to break in.
@@ -58,6 +59,7 @@ class Controller(threading.Thread):
             thermistor_divider_r,
             thermistor_applied_v_ch,
             control_period,
+            outer_avg_periods,
             pwm_channel,
             pwm_period,
             init_pwm_max,
@@ -72,7 +74,10 @@ class Controller(threading.Thread):
         self.outer_temps = outer_temps
         self.inner_temps = inner_temps
         self.info_temps = info_temps
+        self.thermistor_divider_r = thermistor_divider_r
+        self.thermistor_applied_v_ch = thermistor_applied_v_ch
         self.control_period = control_period
+        self.outer_avg_periods = outer_avg_periods
         self.pwm_channel = pwm_channel
         self.pwm_period = pwm_period
         self.results_callback = results_callback
@@ -193,6 +198,10 @@ class Controller(threading.Thread):
 
         while True:
 
+            # Create the object that calculates the rolling average of the outer
+            # chamber.
+            outer_averager = RollingAverage(self.outer_avg_periods)
+
             try:
                 # start a dictionary to hold all the temperature values and the PWM output
                 vals = {}
@@ -205,9 +214,15 @@ class Controller(threading.Thread):
                 vals['outer'] = summarize_thermistor_group(self.outer_thermistors, readings)
                 vals['info'] = summarize_thermistor_group(self.info_thermistors, readings)
 
+                # calculate a new rolling average value for the outer chamber, using the
+                # the average value of the sensors assigned to this group.  Add it into the 
+                # data summary dictionary. 
+                outer_rolling = outer_averager.add_reading(vals['outer']['average'])
+                vals['outer']['rolling_avg'] = outer_rolling
+
                 # calculate the delta-temperature between inner and outer chamber and save
                 # it in the vals dictionary.
-                delta_t = vals['inner']['average'] -  vals['outer']['average']
+                delta_t = vals['inner']['average'] -  vals['outer']['rolling_avg']
                 vals['delta_t'] = round(delta_t, 2)
 
                 # calculate, use, and store the new output value from the PID controller object
@@ -216,7 +231,7 @@ class Controller(threading.Thread):
                         new_pwm = self.pwm_max if delta_t < 0 else 0.0    # simple On/Off control
                     else:
                         new_pwm = self.pid(delta_t)
-                    vals['pwm'] =  round(new_pwm, 3)
+                    vals['pwm'] = round(new_pwm, 3)
                     self.pwm.set_value(new_pwm)
                 else:
                     vals['pwm'] = 0.0

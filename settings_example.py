@@ -42,8 +42,8 @@ CONTROL_PERIOD = 0.3      # seconds
 # A rolling average of the outer chamber temperature is used in 
 # the control calculation.  The parameter below determines the number
 # control periods to use in the rolling average.  So, the time span
-# of the rolling average is:  CONTROL_PERIOD * ROLLING_PERIODS
-ROLLING_PERIODS = 1800
+# of the rolling average is:  CONTROL_PERIOD * OUTER_AVG_PERIODS
+OUTER_AVG_PERIODS = 1800
 
 # PWM Digital Output channel number on Labjack
 PWM_CHANNEL = 6

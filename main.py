@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Main script for running the Heater Control program.
+"""This is just a non-GUI test script!!
 Expects a settings.py file in the user/ folder, with the structure
 of 'settings_example.py' found in this folder.
 """
@@ -23,16 +23,24 @@ if __name__=='__main__':
     ki_min, ki_init, ki_max = stng.PID_I
     kd_min, kd_init, kd_max = stng.PID_D
 
+    # get the outer temperature averaging periods from the settings file, but
+    # if not present (recent addition to settings file), assume no averaging.
+    outer_avg_periods = stng.OUTER_ROLLING_PERIODS if hasattr(stng, 'ROLLING_PERIODS') else 1
+
+    #  make a controller object
     controller = Controller(
         stng.OUTER_TEMPS,
         stng.INNER_TEMPS,
         stng.INFO_TEMPS,
+        stng.THERMISTOR_DIVIDER_R,
+        stng.THERMISTOR_APPLIED_V_CH,
         stng.CONTROL_PERIOD,
+        outer_avg_periods,
         stng.PWM_CHANNEL,
         stng.PWM_PERIOD,
         stng.INIT_PWM_MAX,
         (kp_init, ki_init, kd_init),
-        handle_control_results
+        None
     )
     controller.enable_control = True
     controller.enable_on_off_control = False
