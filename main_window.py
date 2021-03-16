@@ -112,7 +112,7 @@ class MainWindow(QWidget):
         for lbl, data in temp_list:
             if data == ('inner', 'average'):
                 combo1_ix = ix    # default item for sensor 1
-            if data == ('outer', 'average'):
+            if data == ('outer', 'rolling_avg'):
                 combo2_ix = ix    # default item for sensor 2
             self.combo_sensor1.addItem(lbl, data)
             self.combo_sensor2.addItem(lbl, data)
