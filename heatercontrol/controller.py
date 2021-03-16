@@ -59,7 +59,7 @@ class Controller(threading.Thread):
             thermistor_divider_r,
             thermistor_applied_v_ch,
             control_period,
-            outer_avg_periods,
+            outer_avg_duration,
             pwm_channel,
             pwm_period,
             init_pwm_max,
@@ -77,7 +77,7 @@ class Controller(threading.Thread):
         self.thermistor_divider_r = thermistor_divider_r
         self.thermistor_applied_v_ch = thermistor_applied_v_ch
         self.control_period = control_period
-        self.outer_avg_periods = outer_avg_periods
+        self.outer_avg_duration = outer_avg_duration
         self.pwm_channel = pwm_channel
         self.pwm_period = pwm_period
         self.results_callback = results_callback
@@ -196,11 +196,18 @@ class Controller(threading.Thread):
         """Start and run the control process.
         """
 
-        while True:
+        # Create the object that calculates the rolling average of the outer
+        # chamber.  First, convert the averaging duration into a number of
+        # control periods to average over.
+        if self.outer_avg_duration:
+            avg_periods = int(self.outer_avg_duration / self.control_period)
+            avg_periods = max(avg_periods, 1)    # make sure not 0
+        else:
+            avg_periods = 1
 
-            # Create the object that calculates the rolling average of the outer
-            # chamber.
-            outer_averager = RollingAverage(self.outer_avg_periods)
+        outer_averager = RollingAverage(avg_periods)
+
+        while True:
 
             try:
                 # start a dictionary to hold all the temperature values and the PWM output

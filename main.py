@@ -23,9 +23,9 @@ if __name__=='__main__':
     ki_min, ki_init, ki_max = stng.PID_I
     kd_min, kd_init, kd_max = stng.PID_D
 
-    # get the outer temperature averaging periods from the settings file, but
+    # get the outer temperature averaging duration from the settings file, but
     # if not present (recent addition to settings file), assume no averaging.
-    outer_avg_periods = stng.OUTER_ROLLING_PERIODS if hasattr(stng, 'ROLLING_PERIODS') else 1
+    outer_avg_duration = stng.OUTER_AVG_SECONDS if hasattr(stng, 'OUTER_AVG_SECONDS') else None
 
     #  make a controller object
     controller = Controller(
@@ -35,7 +35,7 @@ if __name__=='__main__':
         stng.THERMISTOR_DIVIDER_R,
         stng.THERMISTOR_APPLIED_V_CH,
         stng.CONTROL_PERIOD,
-        outer_avg_periods,
+        outer_avg_duration,
         stng.PWM_CHANNEL,
         stng.PWM_PERIOD,
         stng.INIT_PWM_MAX,
