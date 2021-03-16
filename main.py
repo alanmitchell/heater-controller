@@ -13,7 +13,7 @@ def handle_control_results(vals):
     the controller provides the dictionary 'vals', which contains sensor
     and output values. 
     """
-    #pprint(vals)
+    pprint(vals)
     print(f"Delta-T: {vals['delta_t']:.2f} F, PWM: {vals['pwm']:.3f}")
 
 if __name__=='__main__':
@@ -40,7 +40,7 @@ if __name__=='__main__':
         stng.PWM_PERIOD,
         stng.INIT_PWM_MAX,
         (kp_init, ki_init, kd_init),
-        None
+        handle_control_results
     )
     controller.enable_control = True
     controller.enable_on_off_control = False
