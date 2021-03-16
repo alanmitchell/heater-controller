@@ -225,7 +225,7 @@ class Controller(threading.Thread):
                 # the average value of the sensors assigned to this group.  Add it into the 
                 # data summary dictionary. 
                 outer_rolling = outer_averager.add_reading(vals['outer']['average'])
-                vals['outer']['rolling_avg'] = outer_rolling
+                vals['outer']['rolling_avg'] = round(outer_rolling, 2)
 
                 # calculate the delta-temperature between inner and outer chamber and save
                 # it in the vals dictionary.
