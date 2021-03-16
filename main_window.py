@@ -37,6 +37,10 @@ def make_temp_list(setting_temp_list, cat_name):
         return []
     
     ret_list = [ (f'{cat_name}: Average', (cat_name.lower(), 'average'))]
+    if cat_name == 'Outer':
+        # a rolling average is available
+        ret_list.append( ('Outer: Rolling Avg', ('outer', 'rolling_avg')) )
+
     for sensor_label, _, _ in setting_temp_list:
         ret_list.append( (f'{cat_name}: {sensor_label}', (cat_name.lower(), 'detail', sensor_label)) )
 
